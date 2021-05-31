@@ -5,7 +5,7 @@ import re
 
 from fixtext import fix_align
 
-project_title = ('ผลผลิต', 'แผนงาน', 'โครงการ')
+project_title_prefix = ('ผลผลิต', 'แผนงาน', 'โครงการ')
 
 
 def replace_dash(text):
@@ -16,17 +16,24 @@ def replace_dash(text):
 
 
 if __name__ == '__main__':
-    # os.system(f'pdftotext -layout {sys.argv[1]}')
+    os.system(f'pdftotext -layout {sys.argv[1]}')
     text_file_name = sys.argv[1].replace('.pdf', '.txt')
     project_budgets = []
     with open(text_file_name) as text_file:
+        count = 0
         lines = text_file.readlines()
         is_section_6_2 = False
-        project_budget = None
+        is_row = False
         org_name = None
         sub_org_name = None
         plan_name = None
-        count = 0
+        project_name = ''
+        personnel_budget = 0
+        operational_budget = 0
+        investing_budget = 0
+        subsidy_budget = 0
+        other_budget = 0
+        sum_budget = 0
         for line in lines:
             if line.find((' ' * 30) + 'กระทรวง') > 0 or line.find((' ' * 30) + 'สานักนายก') > 0:
                 org_name = line.strip()
@@ -40,54 +47,40 @@ if __name__ == '__main__':
             segments = list(map(replace_dash, segments))
 
             # Inside 6.2 section loop fill all value
-            if is_section_6_2:
-                print(segments)
-                no_number_title = re.sub(r'\d', '', segments[0]).replace('.', '').strip()
-                if len(segments) == 7:
-                    if project_budget is not None and not project_budget['project_name'].startswith('รวม'):
-                        print(project_budget)
-                        project_budgets.append(project_budget)
-
-                    if no_number_title.startswith(project_title):
-                        project_budget = {
-                            'project_name': segments[0],
-                            'personnel_budget': segments[1],
-                            'operational_budget': segments[2],
-                            'investing_budget': segments[3],
-                            'subsidy_budget': segments[4],
-                            'other_budget': segments[5],
-                            'sum_budget': segments[6],
-                        }
-                    else:
-                        pre = ''
-                        if project_budget is not None:
-                            pre = project_budget['project_name']
-
-                        project_budget = {
-                            'project_name': pre + segments[0],
-                            'personnel_budget': segments[1],
-                            'operational_budget': segments[2],
-                            'investing_budget': segments[3],
-                            'subsidy_budget': segments[4],
-                            'other_budget': segments[5],
-                            'sum_budget': segments[6],
-                        }
-
-                # Concat the project name from multiple lines
-                if len(segments) == 1 and project_budget is not None and not no_number_title.startswith(project_title):
-                    project_budget['project_name'] = project_budget['project_name'] + segments[0]
-
+            if line.startswith('รวม'):
+                is_row = True
+                continue
             # Condition find for section 6.2
             if segments[0].find('จาแนกตามแผนงาน ผลผลิต/โครงการ และงบรายจ่าย') > 0:
                 is_section_6_2 = True
 
-            # Condition find for section 7.2 to end 6.2
-            if segments[0].find('รายละเอียดงบประมาณจาแนกตามแผนงาน') > 0:
-                is_section_6_2 = False
-                if project_budget is not None and project_budget['project_name'] != 'รวมทั้งสิ้น':
-                    print(project_budget)
-                    project_budgets.append(project_budget)
-                    project_budget = None
+            if is_section_6_2 and is_row:
+                print(segments)
+                no_number_title = re.sub(r'\d\.', '', segments[0]).strip()
+                if no_number_title.startswith(project_title_prefix) \
+                        or segments[0].find('รายละเอียดงบประมาณจาแนกตามแผนงาน') > 0:
+                    if project_name != '':
+                        project_budgets.append({
+                            'org_name': org_name,
+                            'sub_org_name': sub_org_name,
+                            'project_name': project_name,
+                            'personnel_budget': personnel_budget,
+                            'operational_budget': operational_budget,
+                            'investing_budget': investing_budget,
+                            'subsidy_budget': subsidy_budget,
+                            'other_budget': other_budget,
+                            'sum_budget': sum_budget,
+                        })
+                        project_name = ''
+
+                project_name += segments[0]
+                if len(segments) == 7:
+                    personnel_budget = segments[1]
+                    operational_budget = segments[2]
+                    investing_budget = segments[3]
+                    subsidy_budget = segments[4]
+                    other_budget = segments[5]
+                    sum_budget = segments[6]
 
     if len(project_budgets) > 0:
         csv_file_name = 'budget_by_project.csv'
