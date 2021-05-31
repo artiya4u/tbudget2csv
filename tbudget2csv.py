@@ -3,25 +3,7 @@ import os
 import sys
 import re
 
-specials = ['ุ', 'ู', 'ึ', 'ำ', 'ั', 'ี', '้', '็', '่', '๋']
-
-
-def fix_align(txt):
-    input_txt = list(txt)
-    result = list('')
-    skip_next = False
-    for idx, val in enumerate(input_txt):
-        if val in specials and idx > 1 and idx + 1 < len(input_txt) and input_txt[idx + 1] == ' ':
-            temp = result.pop()
-            result.append(val)
-            result.append(temp)
-            skip_next = True
-        else:
-            if not skip_next:
-                result.append(val)
-            skip_next = False
-
-    return ''.join(result)
+from fixtext import fix_align
 
 
 def thai_number_to_arabic(thai_number):
@@ -40,7 +22,7 @@ def thai_number_to_arabic(thai_number):
 
 
 if __name__ == '__main__':
-    os.system(f'pdftotext {sys.argv[1]} -layout')
+    os.system(f'pdftotext -layout {sys.argv[1]}')
     text_file_name = sys.argv[1].replace('.pdf', '.txt')
     records = []
     with open(text_file_name) as text_file:
