@@ -36,7 +36,7 @@ def convert_6_2_table(pdf_budget_file):
         other_budget = 0
         sum_budget = None
         for line in lines:
-            if line.rstrip().endswith(org_prefix):
+            if any(x in line for x in org_prefix):
                 org_name = line.strip()
                 sub_org_name = lines[count + 1].strip()
 
@@ -48,8 +48,8 @@ def convert_6_2_table(pdf_budget_file):
             segments = list(map(replace_dash, segments))
 
             # Condition find for section 6.2
-            if segments[0].find('6.2 จาแนกตามแผนงาน ผลผลิต/โครงการ และงบรายจ่าย') >= 0 \
-                    or segments[0].find('6. สรุปงบประมาณรายจ่ายประจาปี งบประมาณ ') >= 0:
+            if line.find('6.2 จาแนกตามแผนงาน ผลผลิต/โครงการ และงบรายจ่าย') == 0 \
+                    or line.find('6. สรุปงบประมาณรายจ่ายประจาปี งบประมาณ ') == 0:
                 is_section_6_2 = True
                 continue
 
