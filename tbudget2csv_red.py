@@ -78,8 +78,8 @@ if __name__ == '__main__':
                     project_budget = None
 
     if len(project_budgets) > 0:
-        csv_file_name = sys.argv[1].replace('.pdf', '.csv')
-        f = open(csv_file_name, 'w')
+        csv_file_name = 'budget_by_project.csv'
+        f = open(csv_file_name, 'a')
         w = csv.DictWriter(f, project_budgets[0].keys())
         w.writerows(project_budgets)
         f.close()
