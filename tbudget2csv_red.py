@@ -1,11 +1,12 @@
 import csv
+import glob
 import os
-import sys
 import re
 
 from fixtext import fix_align
 
 project_title_prefix = ('ผลผลิต', 'แผนงาน', 'โครงการ')
+org_prefix = ((' ' * 30) + 'กระทรวง', (' ' * 30) + 'สานักนายก', (' ' * 30) + 'องค์กรปกครอง')
 
 
 def replace_dash(text):
@@ -15,9 +16,10 @@ def replace_dash(text):
         return text
 
 
-if __name__ == '__main__':
-    os.system(f'pdftotext -layout {sys.argv[1]}')
-    text_file_name = sys.argv[1].replace('.pdf', '.txt')
+def convert_6_2_table(pdf_budget_file):
+    print(f'Start convert: {pdf_budget_file}')
+    # os.system(f'pdftotext -layout {pdf_budget_file}')
+    text_file_name = pdf_budget_file.replace('.pdf', '.txt')
     project_budgets = []
     with open(text_file_name) as text_file:
         count = 0
@@ -26,7 +28,6 @@ if __name__ == '__main__':
         is_row = False
         org_name = None
         sub_org_name = None
-        plan_name = None
         project_name = ''
         personnel_budget = 0
         operational_budget = 0
@@ -35,7 +36,7 @@ if __name__ == '__main__':
         other_budget = 0
         sum_budget = None
         for line in lines:
-            if line.find((' ' * 30) + 'กระทรวง') > 0 or line.find((' ' * 30) + 'สานักนายก') > 0:
+            if line.rstrip().endswith(org_prefix):
                 org_name = line.strip()
                 sub_org_name = lines[count + 1].strip()
 
@@ -46,13 +47,15 @@ if __name__ == '__main__':
             segments = list(map(fix_align, segments))
             segments = list(map(replace_dash, segments))
 
-            # Inside 6.2 section loop fill all value
-            if line.startswith('รวม'):
-                is_row = True
-                continue
             # Condition find for section 6.2
-            if segments[0].find('6.2 จาแนกตามแผนงาน ผลผลิต/โครงการ และงบรายจ่าย') >= 0:
+            if segments[0].find('6.2 จาแนกตามแผนงาน ผลผลิต/โครงการ และงบรายจ่าย') >= 0 \
+                    or segments[0].find('6. สรุปงบประมาณรายจ่ายประจาปี งบประมาณ ') >= 0:
                 is_section_6_2 = True
+                continue
+
+            # Inside 6.2 section loop fill all value
+            if line.startswith('รวม') and is_section_6_2:
+                is_row = True
                 continue
 
             if is_section_6_2 and is_row:
@@ -62,7 +65,7 @@ if __name__ == '__main__':
                         or segments[0].find('7. รายละเอียดงบประมาณจ') >= 0:
                     if project_name != '' and sum_budget is not None:
                         is_plan = re.search(r'\d\.', project_name) is not None
-                        project_budgets.append({
+                        plan = {
                             'org_name': org_name,
                             'sub_org_name': sub_org_name,
                             'project_name': project_name,
@@ -73,7 +76,9 @@ if __name__ == '__main__':
                             'subsidy_budget': subsidy_budget,
                             'other_budget': other_budget,
                             'sum_budget': sum_budget,
-                        })
+                        }
+                        print(plan)
+                        project_budgets.append(plan)
                         project_name = ''
                         sum_budget = None
 
@@ -97,8 +102,15 @@ if __name__ == '__main__':
 
     if len(project_budgets) > 0:
         csv_file_name = 'budget_by_project.csv'
-        f = open(csv_file_name, 'w')
+        f = open(csv_file_name, 'a')
         w = csv.DictWriter(f, project_budgets[0].keys())
-        w.writeheader()
         w.writerows(project_budgets)
         f.close()
+
+
+if __name__ == '__main__':
+    pdf_path = 'budget-pdf/'
+    list_of_files = sorted(filter(os.path.isfile, glob.glob(pdf_path + '*.pdf')))
+    for file in list_of_files:
+        if file.endswith('.pdf'):
+            convert_6_2_table(file)
