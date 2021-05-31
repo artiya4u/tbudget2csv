@@ -3,7 +3,7 @@ A tool to convert Thailand's national budget PDF to machine readable CSV format.
 
 ## Getting start
 - Use Python3
-- Install pdf2text on Linux `sudo apt install python3-pdfminer`
+- Install pdftotext on Linux `sudo apt install poppler-utils`
 
 ## Usage
 - Download budget PDF file from http://www.bb.go.th/topic3.php?gid=860&mid=544 filename "ร่างพระราชบัญญัติงบประมาณรายจ่ายประจำปีงบประมาณ พ.ศ. 2565" and save it to `budget2022.pdf`.
