@@ -8,7 +8,7 @@ from fixtext import fix_align
 year = '2565'
 
 project_title_prefix = ('ผลผลิต', 'แผนงาน', 'โครงการ', 'ครงการ', 'แ นงาน')
-org_prefix = ['กระทรวง', 'สานักนายก', 'องค์กรปกครอง', 'จังหวัดและก', 'รัฐวิสา', 'หน่ วยงานของ']
+org_prefix = ['กระทรวง', 'สานัก', 'องค์กรปกครอง', 'จังหวัดและก', 'รัฐวิสา', 'หน่ วยงาน', 'ส่วนราชการ', 'สภา']
 org_prefix = [(' ' * 30) + x for x in org_prefix]  # Add spaces to know organization name in center of the page
 section_6_2_prefix = [
     '6.2 จาแนกตามแผนงาน ผลผลิต/โครงการ และงบรายจ่าย',
@@ -26,8 +26,8 @@ def replace_dash(text):
 
 
 def convert_table_6(pdf_budget_file):
-    print(f'Start convert: {pdf_budget_file}')
-    # os.system(f'pdftotext -layout {pdf_budget_file}')
+    print(f'Start convert file: {pdf_budget_file}')
+    os.system(f'pdftotext -layout {pdf_budget_file}')
     text_file_name = pdf_budget_file.replace('.pdf', '.txt')
     project_budgets = []
     with open(text_file_name) as text_file:
@@ -127,6 +127,8 @@ def convert_table_6(pdf_budget_file):
 if __name__ == '__main__':
     pdf_path = 'budget-pdf/'
     list_of_files = sorted(filter(os.path.isfile, glob.glob(pdf_path + '*.pdf')))
-    for file in list_of_files:
-        if file.endswith('.pdf'):
-            convert_table_6(file)
+    # for file in list_of_files:
+    #     if file.endswith('.pdf'):
+    #         convert_table_6(file)
+
+    convert_table_6('budget-pdf/31.pdf')
