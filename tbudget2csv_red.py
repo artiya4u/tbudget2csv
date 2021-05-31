@@ -16,7 +16,7 @@ def replace_dash(text):
 
 
 if __name__ == '__main__':
-    os.system(f'pdftotext -layout {sys.argv[1]}')
+    # os.system(f'pdftotext -layout {sys.argv[1]}')
     text_file_name = sys.argv[1].replace('.pdf', '.txt')
     project_budgets = []
     with open(text_file_name) as text_file:
@@ -59,7 +59,7 @@ if __name__ == '__main__':
                 print(segments)
                 no_number_title = re.sub(r'\d\.', '', segments[0]).strip()
                 if no_number_title.startswith(project_title_prefix) \
-                        or segments[0].find('รายละเอียดงบประมาณจาแนกตามแผนงาน') > 0:
+                        or segments[0].find('7. รายละเอียดงบประมาณจ') >= 0:
                     if project_name != '' and sum_budget is not None:
                         is_plan = re.search(r'\d\.', project_name) is not None
                         project_budgets.append({
@@ -75,6 +75,12 @@ if __name__ == '__main__':
                             'sum_budget': sum_budget,
                         })
                         project_name = ''
+
+                if segments[0].find('7. รายละเอียดงบประมาณจ') >= 0:
+                    is_row = False
+                    is_section_6_2 = False
+                    continue
+
                 if no_number_title.startswith(project_title_prefix):
                     project_name = segments[0]
                 else:
