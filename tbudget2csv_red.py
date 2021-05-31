@@ -16,7 +16,7 @@ def replace_dash(text):
 
 
 if __name__ == '__main__':
-    # os.system(f'pdftotext -layout {sys.argv[1]}')
+    os.system(f'pdftotext -layout {sys.argv[1]}')
     text_file_name = sys.argv[1].replace('.pdf', '.txt')
     project_budgets = []
     with open(text_file_name) as text_file:
