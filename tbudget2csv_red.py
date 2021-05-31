@@ -33,7 +33,7 @@ if __name__ == '__main__':
         investing_budget = 0
         subsidy_budget = 0
         other_budget = 0
-        sum_budget = 0
+        sum_budget = None
         for line in lines:
             if line.find((' ' * 30) + 'กระทรวง') > 0 or line.find((' ' * 30) + 'สานักนายก') > 0:
                 org_name = line.strip()
@@ -53,17 +53,20 @@ if __name__ == '__main__':
             # Condition find for section 6.2
             if segments[0].find('จาแนกตามแผนงาน ผลผลิต/โครงการ และงบรายจ่าย') > 0:
                 is_section_6_2 = True
+                continue
 
             if is_section_6_2 and is_row:
                 print(segments)
                 no_number_title = re.sub(r'\d\.', '', segments[0]).strip()
                 if no_number_title.startswith(project_title_prefix) \
                         or segments[0].find('รายละเอียดงบประมาณจาแนกตามแผนงาน') > 0:
-                    if project_name != '':
+                    if project_name != '' and sum_budget is not None:
+                        is_plan = re.search(r'\d\.', project_name) is not None
                         project_budgets.append({
                             'org_name': org_name,
                             'sub_org_name': sub_org_name,
                             'project_name': project_name,
+                            'is_plan': is_plan,
                             'personnel_budget': personnel_budget,
                             'operational_budget': operational_budget,
                             'investing_budget': investing_budget,
@@ -72,8 +75,10 @@ if __name__ == '__main__':
                             'sum_budget': sum_budget,
                         })
                         project_name = ''
-
-                project_name += segments[0]
+                if no_number_title.startswith(project_title_prefix):
+                    project_name = segments[0]
+                else:
+                    project_name += segments[0]
                 if len(segments) == 7:
                     personnel_budget = segments[1]
                     operational_budget = segments[2]
