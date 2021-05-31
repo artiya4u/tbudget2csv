@@ -51,7 +51,7 @@ if __name__ == '__main__':
                 is_row = True
                 continue
             # Condition find for section 6.2
-            if segments[0].find('จาแนกตามแผนงาน ผลผลิต/โครงการ และงบรายจ่าย') > 0:
+            if segments[0].find('6.2 จาแนกตามแผนงาน ผลผลิต/โครงการ และงบรายจ่าย') >= 0:
                 is_section_6_2 = True
                 continue
 
@@ -99,5 +99,6 @@ if __name__ == '__main__':
         csv_file_name = 'budget_by_project.csv'
         f = open(csv_file_name, 'w')
         w = csv.DictWriter(f, project_budgets[0].keys())
+        w.writeheader()
         w.writerows(project_budgets)
         f.close()
