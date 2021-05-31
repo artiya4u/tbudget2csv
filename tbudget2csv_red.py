@@ -35,7 +35,7 @@ if __name__ == '__main__':
                 print(segments)
                 no_number_title = re.sub(r'\d', '', segments[0]).replace('.', '').strip()
                 if len(segments) == 7:
-                    if project_budget is not None:
+                    if project_budget is not None and project_budget['project_name'] != 'รวมทั้งสิ้น':
                         project_budgets.append(project_budget)
                     if no_number_title.startswith(project_title):
                         project_budget = {
@@ -73,13 +73,13 @@ if __name__ == '__main__':
             # Condition find for section 7.2 to end 6.2
             if segments[0].find('รายละเอียดงบประมาณจาแนกตามแผนงาน') > 0:
                 is_section_6_2 = False
-                if project_budget is not None:
+                if project_budget is not None and project_budget['project_name'] != 'รวมทั้งสิ้น':
                     project_budgets.append(project_budget)
                     project_budget = None
 
     if len(project_budgets) > 0:
         csv_file_name = 'budget_by_project.csv'
-        f = open(csv_file_name, 'a')
+        f = open(csv_file_name, 'w')
         w = csv.DictWriter(f, project_budgets[0].keys())
         w.writerows(project_budgets)
         f.close()
