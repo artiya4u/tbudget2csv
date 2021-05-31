@@ -16,14 +16,23 @@ def replace_dash(text):
 
 
 if __name__ == '__main__':
-    os.system(f'pdftotext -layout {sys.argv[1]}')
+    # os.system(f'pdftotext -layout {sys.argv[1]}')
     text_file_name = sys.argv[1].replace('.pdf', '.txt')
     project_budgets = []
     with open(text_file_name) as text_file:
         lines = text_file.readlines()
         is_section_6_2 = False
         project_budget = None
+        org_name = None
+        sub_org_name = None
+        plan_name = None
+        count = 0
         for line in lines:
+            if line.find((' ' * 30) + 'กระทรวง') > 0 or line.find((' ' * 30) + 'สานักนายก') > 0:
+                org_name = line.strip()
+                sub_org_name = lines[count + 1].strip()
+
+            count += 1
             segments = line.split('  ')
             segments = list(filter(lambda x: x != '', segments))
             segments = list(map(str.strip, segments))
@@ -35,8 +44,10 @@ if __name__ == '__main__':
                 print(segments)
                 no_number_title = re.sub(r'\d', '', segments[0]).replace('.', '').strip()
                 if len(segments) == 7:
-                    if project_budget is not None and project_budget['project_name'] != 'รวมทั้งสิ้น':
+                    if project_budget is not None and not project_budget['project_name'].startswith('รวม'):
+                        print(project_budget)
                         project_budgets.append(project_budget)
+
                     if no_number_title.startswith(project_title):
                         project_budget = {
                             'project_name': segments[0],
@@ -74,6 +85,7 @@ if __name__ == '__main__':
             if segments[0].find('รายละเอียดงบประมาณจาแนกตามแผนงาน') > 0:
                 is_section_6_2 = False
                 if project_budget is not None and project_budget['project_name'] != 'รวมทั้งสิ้น':
+                    print(project_budget)
                     project_budgets.append(project_budget)
                     project_budget = None
 
