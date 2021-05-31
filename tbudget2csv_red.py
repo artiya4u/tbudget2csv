@@ -75,10 +75,12 @@ if __name__ == '__main__':
                             'sum_budget': sum_budget,
                         })
                         project_name = ''
+                        sum_budget = None
 
                 if segments[0].find('7. รายละเอียดงบประมาณจ') >= 0:
                     is_row = False
                     is_section_6_2 = False
+                    sum_budget = None
                     continue
 
                 if no_number_title.startswith(project_title_prefix):
