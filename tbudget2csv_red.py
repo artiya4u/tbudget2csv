@@ -46,7 +46,7 @@ def convert_table_6(pdf_budget_file):
         sum_budget = None
         for line in lines:
             count += 1
-            if any(x in line for x in org_prefix):
+            if any(line.find(x) > 0 for x in org_prefix) and lines[count].strip() != '':
                 org_name = line.strip()
                 sub_org_name = lines[count].strip()
 
@@ -127,8 +127,8 @@ def convert_table_6(pdf_budget_file):
 if __name__ == '__main__':
     pdf_path = 'budget-pdf/'
     list_of_files = sorted(filter(os.path.isfile, glob.glob(pdf_path + '*.pdf')))
-    # for file in list_of_files:
-    #     if file.endswith('.pdf'):
-    #         convert_table_6(file)
+    for file in list_of_files:
+        if file.endswith('.pdf'):
+            convert_table_6(file)
 
-    convert_table_6('budget-pdf/31.pdf')
+    # convert_table_6('budget-pdf/31.pdf')
