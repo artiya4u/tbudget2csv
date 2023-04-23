@@ -114,10 +114,10 @@ def convert_table_6(pdf_budget_file):
 
     if len(project_budgets) > 0:
         try:
-            os.makedirs('output/')
+            os.makedirs('budget-csv-red/')
         except OSError:
             pass
-        csv_file_name = 'output/' + pdf_budget_file.split('/')[1].replace('.pdf', '.csv')
+        csv_file_name = 'budget-csv-red/' + pdf_budget_file.split('/')[1].replace('.pdf', '.csv')
         f = open(csv_file_name, 'w')
         w = csv.DictWriter(f, project_budgets[0].keys())
         w.writerows(project_budgets)
@@ -125,7 +125,7 @@ def convert_table_6(pdf_budget_file):
 
 
 if __name__ == '__main__':
-    pdf_path = 'budget-pdf/'
+    pdf_path = 'budget-pdf-red/'
     list_of_files = sorted(filter(os.path.isfile, glob.glob(pdf_path + '*.pdf')))
     for file in list_of_files:
         if file.endswith('.pdf'):
