@@ -7,18 +7,21 @@ from fixtext import fix_align
 
 
 def thai_number_to_arabic(thai_number):
-    thai_number = thai_number.replace('๐', '0')
-    thai_number = thai_number.replace('๑', '1')
-    thai_number = thai_number.replace('๒', '2')
-    thai_number = thai_number.replace('๓', '3')
-    thai_number = thai_number.replace('๔', '4')
-    thai_number = thai_number.replace('๕', '5')
-    thai_number = thai_number.replace('๖', '6')
-    thai_number = thai_number.replace('๗', '7')
-    thai_number = thai_number.replace('๘', '8')
-    thai_number = thai_number.replace('๙', '9')
-    thai_number = thai_number.replace(',', '')
-    return thai_number
+    """
+    Convert Thai number to Arabic number using ord() and chr()
+    :param thai_number:
+    :return:
+    """
+    arabic_number = ''
+    for c in thai_number:
+        if 3664 <= ord(c) <= 3673:
+            arabic_number += chr(ord(c) - 3664 + 48)
+        elif c == ',':
+            arabic_number += ''
+        else:
+            arabic_number += c
+
+    return arabic_number
 
 
 if __name__ == '__main__':
